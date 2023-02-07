@@ -1,0 +1,19 @@
+Package: summerCalendR
+Type: Package
+Title: Help create summer camp calendar
+Version: 0.1.0
+Authors@R: 
+    person("imo", "06", ,email = 'a.b@gmail.com', role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: The package contains a single `R6` object that builds off the `calendR` package to help create a calendar with the summer camps labelled. It can also give an approximate price.
+License: GNU
+Depends:
+  data.table
+Imports:
+  ggplot2,
+  calendR,
+  RColorBrewer,
+  R6
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
