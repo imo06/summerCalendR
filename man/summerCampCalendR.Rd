@@ -175,7 +175,11 @@ get the first work day of the week
 \subsection{Method \code{Plot()}}{
 generate a `gg` object
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{summerCampCalendR$Plot(palette.name = "Paired", addprice = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{summerCampCalendR$Plot(
+  palette.name = "Paired",
+  addprice = TRUE,
+  reorderColour = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

@@ -3,6 +3,38 @@
 #' Helps in the creation of a camp calendar that can be shared or printed.
 #' It estimates the total cost using the inputs. It does not account for
 #' regional holidays.
+#' @export
+
+#' @examples
+#' require(summerCalendR)
+#'
+#' summerCamps <- summerCampCalendR$new()
+#'
+#' summerCamps <- summerCampCalendR$new()
+#' summerCamps$CreateCalendar('2023-07-03', '2023-09-30')
+#' summerCamps$AddCampCost(
+#'   "UofTDance" = 361,
+#'   "UofTGymnastics" = 422,
+#'   "Minecraft" = 495,
+#'   "AnnexArt" = 395,
+#'   "ROM" = 300,
+#'   "JuniorExplorers" = 130
+#' )
+#'
+#'
+#' summerCamps$AddSummerCampDates(
+#'   JuniorExplorers= c('2023-07-04', '2023-07-10'),
+#'   AnnexArt = '2023-07-17',
+#'   UofTGymnastics = '2023-07-24',
+#'   UofTGymnastics = '2023-07-31',
+#'   UofTDance = '2023-08-07',
+#'   Minecraft = '2023-08-14',
+#'   Vacation = c('2023-08-21', '2023-08-28')
+#' )
+#' summerCamps$AddSchool('2023-09-06')
+#' summerCamps$CalculatePrice()
+#' summerCamps$Plot()
+
 
 summerCampCalendR <- R6::R6Class(
   'summerCampCalendR',
@@ -20,7 +52,7 @@ summerCampCalendR <- R6::R6Class(
         as.data.frame.list() |>
         data.table::as.data.table() |>
         data.table::melt.data.table(measure.vars = names(args), variable.name = 'Camp', value.name = 'Price')
-      private$camps <- rbind(private$camps[!Camp %in% args.df$Camp], args.df)
+      private$camps <- rbind(private$camps, args.df)
       invisible(self)
     },
     #' @description View the camps you have input. You cannot adjust them here.
@@ -68,7 +100,7 @@ summerCampCalendR <- R6::R6Class(
 
       sum(merge(
         dates[weekend == 0, .SD[date == min(date)], by = .(woy)],
-        camps,
+        private$camps,
         by = 'Camp'
       )$Price, na.rm = TRUE) * tax
     },
@@ -89,7 +121,7 @@ summerCampCalendR <- R6::R6Class(
     #' @description generate a `gg` object
     #' @param palette.name the name of the RColorBrewer palette. Defaults to 'Paired'
     #' @param addprice boolean
-    Plot = function(palette.name = 'Paired', addprice = TRUE){
+    Plot = function(palette.name = 'Paired', addprice = TRUE, reorderColour = TRUE){
       private$calendar.context$events[subset(private$calendar.context$dates, weekend == 1)$ind] <- NA
       clr <- private$create.colours(private$calendar.context, palette.name = palette.name)
       plt <- calendR::calendR(
@@ -104,7 +136,13 @@ summerCampCalendR <- R6::R6Class(
         title.size = 30,                       # Title size
         orientation = "p"         # Vertical orientation
       )
-      plt + ggplot2::labs(subtitle = paste0("Total Camp Cost (excl. tax): C$ ", prettyNum(round(self$CalculatePrice(),0), big.mark = ',')))
+      if(addprice){
+        plt <- plt + ggplot2::labs(subtitle = paste0("Total Camp Cost (excl. tax): C$ ", prettyNum(round(self$CalculatePrice(),0), big.mark = ',')))
+      }
+      if(reorderColour){
+        plt <- plt + ggplot2::scale_fill_manual(breaks = unique(na.omit(self$GetEvents()$Camp)), values = clr, na.value = 'white')
+      }
+      plt
     }
   ),
   active = list(
